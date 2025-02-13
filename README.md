@@ -1,16 +1,6 @@
 # todo_app_5stack
 
-A new Flutter project.
+Just a todo app with Llama 3 integration.<br>
+The main purpose of this application is to learn how to integrate AI and establish a connection to a server. <br>
 
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+This is made by me and my team as part of our mockup hackathon in preparation of the University of the Philippines' <b>KOMSAI WEEK 2025 HACKATHON<b>
