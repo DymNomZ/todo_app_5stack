@@ -1,38 +1,87 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:todo_app_5stack/utils/todo_list.dart';
+import 'package:todo_app_5stack/group_page.dart';
+import 'package:todo_app_5stack/utils/search_field.dart';
+import 'package:todo_app_5stack/utils/todo_note.dart';
 
 class HomePage extends StatefulWidget {
-  HomePage({super.key});
+
+  static List groupList = ['Main'];
+  static List filteredGroups = [];
+  static String currentGroup = 'Main';
+  
+  const HomePage({super.key});
 
   @override
   State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
-  final _controller = TextEditingController();
-  List toDoList = [
-    ['Learn These Shit', false],
-    ['Drink', false],
-    ['yawa', false],
-  ];
 
-  void checkBoxChanged(int idx){
+  final TextEditingController _titleController = TextEditingController();
+
+  List todoNoteList = [];
+  List filteredTodoNoteList = [];
+  TextEditingController _contentController = TextEditingController();
+  // TextEditingController _folderName = TextEditingController();
+  // bool isMoving = false;
+
+  // fillNoteList(){
+  //   setState(() {
+  //     filteredNotes = noteBox.values.where((note) => note.folder == cf).toList();
+  //   });
+  // }
+
+  // fillFolderList(){
+  //   setState(() {
+  //     filteredFolders = folderBox.values.toList();
+  //   });
+  // }
+
+  // checkFolderBox(){
+  //   if(folderBox.isEmpty) {
+  //     setState(() {
+  //       folderBox.put(0, 'Notes');
+  //     });
+  //   }
+  // }
+
+  @override
+  void initState(){
+    super.initState();
+  }
+
+  void onSearchTextChanged(String searchText) {
     setState(() {
-      toDoList[idx][1] = !toDoList[idx][1];
+      if(searchText.isNotEmpty) {
+          filteredTodoNoteList = todoNoteList
+        .where((todonote) =>
+            (todonote.taskName.toLowerCase().contains(searchText.toLowerCase()) ||
+            (todonote.content.toLowerCase().contains(searchText.toLowerCase())) && 
+            (todonote.groupName == HomePage.currentGroup)))
+        .toList();
+      }
+      else {
+        filteredTodoNoteList = todoNoteList;
+      }
     });
   }
 
   void newTask(){
     setState(() {
-      toDoList.add([_controller.text, false]);
-      _controller.clear();
+      todoNoteList.add(
+        TodoNote(
+          taskName: _titleController.text, taskState: false,
+          deleteItem: deleteTask, groupName: HomePage.currentGroup
+          )
+      );
+      _titleController.clear();
+      filteredTodoNoteList = todoNoteList;
     });
   }
 
-  void deleteTask(int idx){
+  void deleteTask(TodoNote tn){
     setState(() {
-      toDoList.removeAt(idx);
+      todoNoteList.remove(tn);
     });
   }
 
@@ -45,17 +94,37 @@ class _HomePageState extends State<HomePage> {
           centerTitle: true, // Aligns the title in the center
           backgroundColor: Colors.indigo,
           foregroundColor: Colors.lightBlue.shade200,
+          leading: IconButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => GroupPage())
+              );
+            },
+            icon: Icon(
+              Icons.folder_open,
+              color: Colors.black,
+              size: 20
+            )
+          ),
         ),
-        body: ListView.builder(
-          itemCount: toDoList.length,
-          itemBuilder: (BuildContext context, index) {
-            return TodoList(
-              taskName: toDoList[index][0],
-              taskState: toDoList[index][1],
-              onChanged: (value) => checkBoxChanged(index),
-              deleteItem: (context) => deleteTask(index),
-            );
-          },
+        body: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(15.0),
+              child: SearchField(onChanged: onSearchTextChanged)
+            ),
+            Expanded(
+              child: ListView.builder(
+                itemCount: filteredTodoNoteList.length,
+                itemBuilder: (BuildContext context, index) {
+                  TodoNote tn = filteredTodoNoteList[index];
+                  return tn;
+                },
+              ),
+            ),
+          ],
         ),
         floatingActionButton: Padding(
             padding: EdgeInsets.symmetric(horizontal: 20),
@@ -67,7 +136,7 @@ class _HomePageState extends State<HomePage> {
                         horizontal: 20
                     ),
                     child: TextField(
-                      controller: _controller,
+                      controller: _titleController,
                       decoration: InputDecoration(
                         hintText: 'What are you gonna do today?',
                         filled: true,
@@ -92,13 +161,10 @@ class _HomePageState extends State<HomePage> {
                 FloatingActionButton(
                   onPressed: newTask,
                   child: Icon(Icons.add),
-
                 ),
               ],
             )
         )
-
-
     );
   }
 }
