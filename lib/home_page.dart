@@ -5,9 +5,8 @@ import 'package:todo_app_5stack/utils/todo_note.dart';
 
 class HomePage extends StatefulWidget {
 
+  //I made it static since there's only one groupList and GroupPage will refer to it
   static List groupList = ['Main'];
-  static List filteredGroups = [];
-  static String currentGroup = 'Main';
   
   const HomePage({super.key});
 
@@ -22,34 +21,22 @@ class _HomePageState extends State<HomePage> {
   List todoNoteList = [];
   List filteredTodoNoteList = [];
   TextEditingController _contentController = TextEditingController();
-  // TextEditingController _folderName = TextEditingController();
-  // bool isMoving = false;
+  String currentGroup = 'Main'; // new Todos will base their current group on this variable
 
-  // fillNoteList(){
-  //   setState(() {
-  //     filteredNotes = noteBox.values.where((note) => note.folder == cf).toList();
-  //   });
-  // }
-
-  // fillFolderList(){
-  //   setState(() {
-  //     filteredFolders = folderBox.values.toList();
-  //   });
-  // }
-
-  // checkFolderBox(){
-  //   if(folderBox.isEmpty) {
-  //     setState(() {
-  //       folderBox.put(0, 'Notes');
-  //     });
-  //   }
-  // }
+  //loads the notes of the current group
+  fillTodoNoteList(int index){
+    setState(() {
+      currentGroup = HomePage.groupList[index];
+      filteredTodoNoteList = todoNoteList.where((todonote) => todonote.groupName == currentGroup).toList();
+    });
+  }
 
   @override
   void initState(){
     super.initState();
   }
 
+  //filters todonotes which contains the search text
   void onSearchTextChanged(String searchText) {
     setState(() {
       if(searchText.isNotEmpty) {
@@ -57,13 +44,21 @@ class _HomePageState extends State<HomePage> {
         .where((todonote) =>
             (todonote.taskName.toLowerCase().contains(searchText.toLowerCase()) ||
             (todonote.content.toLowerCase().contains(searchText.toLowerCase())) && 
-            (todonote.groupName == HomePage.currentGroup)))
+            (todonote.groupName == currentGroup)))
         .toList();
       }
       else {
-        filteredTodoNoteList = todoNoteList;
+        loadListOfGroup();
       }
     });
+  }
+  
+  //ensures that the todonotes loaded will only be of that group
+  void loadListOfGroup() {
+    filteredTodoNoteList = todoNoteList
+        .where((todonote) =>
+            (todonote.groupName == currentGroup))
+        .toList();
   }
 
   void newTask(){
@@ -71,11 +66,11 @@ class _HomePageState extends State<HomePage> {
       todoNoteList.add(
         TodoNote(
           taskName: _titleController.text, taskState: false,
-          deleteItem: deleteTask, groupName: HomePage.currentGroup
+          deleteItem: deleteTask, groupName: currentGroup
           )
       );
       _titleController.clear();
-      filteredTodoNoteList = todoNoteList;
+      loadListOfGroup();
     });
   }
 
@@ -96,9 +91,11 @@ class _HomePageState extends State<HomePage> {
           foregroundColor: Colors.lightBlue.shade200,
           leading: IconButton(
             onPressed: () {
+              //Flutter class that handles the navigation of pages, very neat
+              //push well, puts the screen on top of the stack so that is what you'll see next
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => GroupPage())
+                MaterialPageRoute(builder: (context) => GroupPage(fillTodoNoteList: fillTodoNoteList))
               );
             },
             icon: Icon(
@@ -119,6 +116,7 @@ class _HomePageState extends State<HomePage> {
               child: ListView.builder(
                 itemCount: filteredTodoNoteList.length,
                 itemBuilder: (BuildContext context, index) {
+                  //cleaner, so that no redundnat instances of the TodoNote class
                   TodoNote tn = filteredTodoNoteList[index];
                   return tn;
                 },

@@ -30,7 +30,7 @@ class _TodoNoteState extends State<TodoNote> {
         onTap: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => TodoNoteView(tn: widget))
+            MaterialPageRoute(builder: (context) => TodoNoteView(tn: widget)) // we pass itself so that it gets automatically updated because of its reference
           );
         },
         child: Slidable(
